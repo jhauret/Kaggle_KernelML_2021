@@ -11,6 +11,7 @@ Created on Fri Feb 26 12:03:25 2021
 import numpy as np
 from itertools import product
 from fuzzysearch import find_near_matches
+from Bio import pairwise2
 
 
 def phi_u_spectrum(x,u,k):
@@ -92,7 +93,7 @@ def subseq2idx(subseq):
     return idx
 
             
-def phi(x,k,kernel='substring',tolerance=1):
+def phi(x,k,kernel='spectrum_efficient',tolerance=1):
     """
     ------------------------------------------------------------------------------
     Compute the non-linear projection of DNA sequence on a vector of dimension 4**k
@@ -120,13 +121,40 @@ def phi(x,k,kernel='substring',tolerance=1):
         subseqs=seq2subseq(x,k)
         for subseq in subseqs:
             feat_vec[subseq2idx(subseq)]+=1
-        
-            
+                                
     return feat_vec
 
 
-
-
+def K(seq1,seq2,k=5,tolerance=1,kernel='bio'):
+    """
+    ------------------------------------------------------------------------------
+    Compute directly the kernel K(seq1,seq2)
+    The projection is not made explicit
+    ------------------------------------------------------------------------------
+    
+    Inputs:
+    seq1,seq2: DNAs sequences (with ATGC letters)
+    k: length of subsequences considered
+    
+    Output:
+    Kernel function (a real number)
+    """
+    result=0
+    
+    if kernel=='mismatch':
+        subseqs1=seq2subseq(seq1,k)
+        for subseq1 in subseqs1:
+            result+=len(find_near_matches(subseq1,seq2, max_l_dist=tolerance))
+            
+        subseqs2=seq2subseq(seq2,k)
+        for subseq2 in subseqs2:
+            result+=len(find_near_matches(subseq2,seq1, max_l_dist=tolerance))
+    
+    elif kernel=='bio':
+        result = pairwise2.align.globalxx(seq1,seq2,score_only=True)
+        
+    return result
+    
 
 
 
