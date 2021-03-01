@@ -71,5 +71,5 @@ def fit_SVM_and_predict(K, gram, Y, C=1, get_proba=True):
     if get_proba:
         return y
     else:
-        return np.sgn(y)
+        return np.sign(y)
 
