@@ -34,14 +34,21 @@ def SVM(K, Y, C=1.0):
         A=A,
         b=b,
     )
-    alphas = np.array(sol["x"])
+    alphas = np.array(sol["x"]).flatten()
 
-    return alphas
+    S = 1e-4 < alphas
+    M = np.logical_and(S, (alphas < C - 1e-4))
+
+    b = np.mean(
+        [label[n] - (alphas * label).dot(K[n, :]) for n in np.where(M)[0]]
+    )
+
+    return alphas, b
 
 
-def pred(gram, Y, alphas):
+def pred(gram, Y, alphas, b):
     label = -1.0 * np.logical_not(Y) + 1.0 * Y
-    return gram.dot(alphas * label)
+    return gram.dot(alphas * label) + b
 
 
 def fit_SVM_and_predict(K, gram, Y, C=1, get_proba=True):
@@ -50,14 +57,14 @@ def fit_SVM_and_predict(K, gram, Y, C=1, get_proba=True):
 
     Args:
         K (matrix): the gram matrix from the training data
-            for the linear kernel : K = np.dot(X_train , X_train.T) 
+            for the linear kernel : K = np.dot(X_train , X_train.T)
         gram (matrix): the gram matrix used for prediction]
-            for the linear kernel : gram = np.dot(X_test , X_train.T) 
+            for the linear kernel : gram = np.dot(X_test , X_train.T)
         Y (boolean array): the labels of the training set
         C (int, optional): the regularization parameter, the higher it is
         the less regularized the solution is
         get_proba (bool, optional): when True, the algorithm outputs an array
-        of float, which signs are the prediction. If False, this array is 
+        of float, which signs are the prediction. If False, this array is
         passed through the sign function
 
     Returns:
@@ -65,11 +72,9 @@ def fit_SVM_and_predict(K, gram, Y, C=1, get_proba=True):
     """
     # TODO : implement the intercept
 
-    alphas = SVM(K, Y, C=C)
-    alphas = np.squeeze(alphas)
-    y = pred(gram, Y, alphas)
+    alphas, b = SVM(K, Y, C=C)
+    y = pred(gram, Y, alphas, b)
     if get_proba:
         return y
     else:
         return np.sign(y)
-
