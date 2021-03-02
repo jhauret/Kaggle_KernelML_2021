@@ -151,7 +151,7 @@ def K(seq1,seq2,k=5,tolerance=1,kernel='bio'):
             result+=len(find_near_matches(subseq2,seq1, max_l_dist=tolerance))
     
     elif kernel=='bio':
-        result = pairwise2.align.globalxx(seq1,seq2,score_only=True)
+        result = pairwise2.align.globalxx(seq1,seq2,score_only=True,penalize_extend_when_opening=True,penalize_end_gaps=True)
         
     return result
     
