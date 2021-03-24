@@ -7,6 +7,10 @@ cvxopt_solvers.options["show_progress"] = False
 
 
 def SVM(K, Y, C=1.0):
+
+    assert np.allclose(K, K.T, rtol=1e-5)
+
+
     N = K.shape[0]
     G = np.vstack([np.eye(N, N), -np.eye(N, N)])
 
@@ -36,8 +40,8 @@ def SVM(K, Y, C=1.0):
     )
     alphas = np.array(sol["x"]).flatten()
 
-    S = 1e-4 < alphas
-    M = np.logical_and(S, (alphas < C - 1e-4))
+    S = 1e-15 < alphas
+    M = np.logical_and(S, (alphas < C - 1e-15))
 
     b = np.mean(
         [label[n] - (alphas * label).dot(K[n, :]) for n in np.where(M)[0]]
@@ -51,7 +55,7 @@ def pred(gram, Y, alphas, b):
     return gram.dot(alphas * label) + b
 
 
-def fit_SVM_and_predict(K, gram, Y, C=1, get_proba=True):
+def fit_SVM_and_predict(K, gram, Y, C=1, get_proba=True, ):
     """
     fit the SVM on the training data, and predict
 
@@ -70,7 +74,6 @@ def fit_SVM_and_predict(K, gram, Y, C=1, get_proba=True):
     Returns:
         array: prediction
     """
-    # TODO : implement the intercept
 
     alphas, b = SVM(K, Y, C=C)
     y = pred(gram, Y, alphas, b)

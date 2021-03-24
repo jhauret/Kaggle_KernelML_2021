@@ -125,10 +125,10 @@ def phi(x,k,kernel='spectrum_efficient',tolerance=1):
     return feat_vec
 
 
-def K(seq1,seq2,k=5,tolerance=1,kernel='bio'):
+def Kernel_func(seq1,seq2,k=5,tolerance=1,kernel='bio'):
     """
     ------------------------------------------------------------------------------
-    Compute directly the kernel K(seq1,seq2)
+    Compute directly the kernel Kernel_func(seq1,seq2)
     The projection is not made explicit
     ------------------------------------------------------------------------------
     
